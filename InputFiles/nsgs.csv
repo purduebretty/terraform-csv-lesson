@@ -1,0 +1,6 @@
+name,security_rule_name,description,direction,access,protocol,priority,source_port_ranges,destination_port_ranges,source_address_prefixes,destination_address_prefixes,source_application_security_group_ids,destination_application_security_group_ids
+  default,allow_sql_inbound,,Inbound,Allow,*,100,*,1433,10.0.0.0/24,10.0.0.0/24,,
+Default,Allow_Private,"Allow 10s, 192s, 172s",Inbound,Allow,*,110,*,*,"10.0.0.0/8,172.16.0.0/12,192.168.0.0/16",*,,
+default   ,AllowAnyCustomAnyOutbound,Allow_Private_Out,Outbound,Allow,*,200,*,*,*,"10.0.0.0/8,192.168.0.0/16",,
+sql-mi,zallow_sql_inbound,,Inbound,Allow,*,102,*,1433,10.0.0.0/24,10.0.0.0/24,,
+sql-mi,allow_sql_inbound,,Inbound,Allow,*,103,*,1433,10.0.0.0/24,10.0.0.0/24,,
