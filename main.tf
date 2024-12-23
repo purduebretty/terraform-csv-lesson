@@ -1,7 +1,7 @@
 locals {
   vnets   = { for Row in csvdecode(file("./InputFiles/vnets.csv")) : Row.name => Row }
   subnets = { for Row in csvdecode(file("./InputFiles/subnets.csv")) : "${Row.vnet_name}.${Row.subnet_name}" => Row }
-  nsgs    = { for Index, Row in csvdecode(file("./InputFiles/nsgs.csv")) : trimspace(lower(Index)) => Row }
+  nsgs    = { for Index, Row in csvdecode(file("./InputFiles/nsgs.csv")) : Index => Row }
 }
 
 resource "azurerm_resource_group" "this" {
