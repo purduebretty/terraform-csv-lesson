@@ -36,7 +36,7 @@ resource "azurerm_network_security_group" "this" {
 
 # ordering is alphabeitcal rather than csv order
 resource "azurerm_network_security_rule" "this" {
-  for_each = local.nsgs
+  for_each = { for k, v in local.nsgs : "${trimspace(lower(v.name))}.${trimspace(lower(v.security_rule_name))}" => merge(v, { index = k }) }
 
   name                        = each.value.security_rule_name
   network_security_group_name = azurerm_network_security_group.this["${trimspace(lower(each.value.name))}"].name
@@ -44,7 +44,7 @@ resource "azurerm_network_security_rule" "this" {
   resource_group_name          = azurerm_resource_group.this.name
   description                  = each.value.description
   direction                    = each.value.direction
-  priority                     = each.key + 100
+  priority                     = each.value.index + 100
   protocol                     = each.value.protocol
   access                       = each.value.access
   source_port_range            = each.value.source_port_ranges == "*" ? "*" : null
