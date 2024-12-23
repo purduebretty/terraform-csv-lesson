@@ -1,7 +1,7 @@
 locals {
   vnets   = { for Row in csvdecode(file("./InputFiles/vnets.csv")) : Row.name => Row }
   subnets = { for Row in csvdecode(file("./InputFiles/subnets.csv")) : "${Row.vnet_name}.${Row.subnet_name}" => Row }
-  nsgs    = { for Index, Row in csvdecode(file("./InputFiles/nsgs.csv")) : Index => Row }
+  nsgs    = { for Index, Row in csvdecode(file("./InputFiles/nsgs.csv")) : "${trimspace(lower(Row.name))}.${trimspace(lower(Row.security_rule_name))}" => merge(Row, { index = Index }) }
 }
 
 resource "azurerm_resource_group" "this" {
@@ -36,7 +36,7 @@ resource "azurerm_network_security_group" "this" {
 
 # ordering is alphabeitcal rather than csv order
 resource "azurerm_network_security_rule" "this" {
-  for_each = { for k, v in local.nsgs : "${trimspace(lower(v.name))}.${trimspace(lower(v.security_rule_name))}" => merge(v, { index = k }) }
+  for_each = local.nsgs
 
   name                        = each.value.security_rule_name
   network_security_group_name = azurerm_network_security_group.this["${trimspace(lower(each.value.name))}"].name
