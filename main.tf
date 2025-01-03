@@ -60,27 +60,43 @@ resource "azurerm_network_security_rule" "this" {
   destination_application_security_group_ids = length(each.value.destination_application_security_group_ids) > 0 ? split(",", each.value.destination_application_security_group_ids) : null
 }
 
-# resource "azurerm_network_security_rule" "this" {
-#   for_each = local.nsgs
+output "test" {
+  value = csvdecode(file("./InputFiles/nsgs.csv"))
+}
 
-#   name                        = each.value.security_rule_name
-#   network_security_group_name = azurerm_network_security_group.this[each.key].name
 
-#   resource_group_name          = azurerm_resource_group.this.name
-#   description                  = each.value.description
-#   direction                    = each.value.direction
-#   priority                     = each.value.priority
-#   protocol                     = each.value.protocol
-#   access                       = each.value.access
-#   source_port_range            = each.value.source_port_ranges == "*" ? "*" : null
-#   source_port_ranges           = each.value.source_port_ranges == "*" ? null : split(",", each.value.source_port_ranges)
-#   destination_port_range       = each.value.destination_port_ranges == "*" ? "*" : null
-#   destination_port_ranges      = each.value.destination_port_ranges == "*" ? null : split(",", each.value.destination_port_ranges)
-#   source_address_prefix        = each.value.source_address_prefixes == "*" ? "*" : null
-#   source_address_prefixes      = each.value.source_address_prefixes == "*" ? null : split(",", each.value.source_address_prefixes)
-#   destination_address_prefix   = each.value.destination_address_prefixes == "*" ? "*" : null
-#   destination_address_prefixes = each.value.destination_address_prefixes == "*" ? null : split(",", each.value.destination_address_prefixes)
+###################################
+# From Variables
+###################################
 
-#   source_application_security_group_ids      = length(each.value.source_application_security_group_ids) > 0 ? split(",", each.value.source_application_security_group_ids) : null
-#   destination_application_security_group_ids = length(each.value.destination_application_security_group_ids) > 0 ? split(",", each.value.destination_application_security_group_ids) : null
-# }
+resource "azurerm_virtual_network" "variable" {
+  for_each            = var.vnets
+  name                = each.key
+  location            = each.value.location == null ? azurerm_resource_group.this.location : each.value.location
+  resource_group_name = azurerm_resource_group.this.name
+  address_space       = each.value.address_space
+  dns_servers         = each.value.dns_servers
+}
+
+resource "azurerm_subnet" "variable" {
+  for_each             = var.subnets
+  name                 = each.value.name
+  virtual_network_name = each.value.virtual_network_name
+  resource_group_name  = azurerm_resource_group.this.name
+  address_prefixes     = each.value.address_prefixes
+
+  dynamic "delegation" {
+    for_each = each.value.delegation != null ? [{}] : []
+    content {
+      name = each.value.delegation.name
+
+      dynamic "service_delegation" {
+        for_each = [{}]
+        content {
+          name    = each.value.delegation.service_delegation.name
+          actions = each.value.delegation.service_delegation.actions
+        }
+      }
+    }
+  }
+}
