@@ -48,6 +48,7 @@ subnets = {
         name    = "Microsoft.Web/serverFarms"
       }
     }
+    private_link_service_network_policies_enabled = false
   }  
   "from_var_2.default" = {
     name = "default"
@@ -68,6 +69,7 @@ subnets = {
         name    = "Microsoft.Web/serverFarms"
       }
     }
+    private_link_service_network_policies_enabled = true
   }
   "from_var_3.default" = {
     name = "default"
